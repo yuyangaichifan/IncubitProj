@@ -1,10 +1,12 @@
+import sys
+sys.path.append("./")
 from detectron2.engine import DefaultTrainer, DefaultPredictor
 from detectron2.config import get_cfg
 import os, cv2, json
 from rdp import rdp
 from detectron2.utils.visualizer import Visualizer, ColorMode, GenericMask
 import matplotlib.pyplot as plt
-
+import argparse
 
 def predOneImg(predictor, imgNameFull, annoResName, visRoot, thing_classes, divNum=2, isVis = 0):
 
@@ -60,34 +62,43 @@ def predOneImg(predictor, imgNameFull, annoResName, visRoot, thing_classes, divN
         picName = os.path.join(visRoot, imgName)
         plt.imsave(picName, vPoly.output.get_image()[:, :, ::-1])
 
+def main(dataRoot, taskName, isVis):
+    cfg = get_cfg()
+    cfg.merge_from_file("Cfg/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")
+    cfg.DATASETS.TRAIN = ("TrainSetBatch",)
+    cfg.DATALOADER.NUM_WORKERS = 24
+    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 512
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 3
+    cfg.OUTPUT_DIR = './' + taskName + '_output'
+    cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5  # 测试的阈值
+    predictor = DefaultPredictor(cfg)
 
-cfg = get_cfg()
-cfg.merge_from_file("/home/yu/Documents/Facebook/detectron2/detectron2/model_zoo/configs/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")
-cfg.DATALOADER.NUM_WORKERS = 24
-cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 256 # faster, and good enough for this toy dataset
-cfg.MODEL.ROI_HEADS.NUM_CLASSES = 3
-cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
-cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5 #测试的阈值
-predictor = DefaultPredictor(cfg)
-thing_classes = ['Houses', 'Buildings', 'Sheds/Garages']
+    thing_classes = ['Houses', 'Buildings', 'Sheds/Garages']
 
+    imgPath = os.path.join(dataRoot, taskName, 'imgInfer')
+    resPath = os.path.join(dataRoot, taskName, 'resInfer')
+    visRoot = os.path.join(dataRoot, taskName, 'visInfer')
+    if not os.path.exists(imgPath):
+        os.mkdir(imgPath)
+    if not os.path.exists(resPath):
+        os.mkdir(resPath)
+    if not os.path.exists(visRoot):
+        os.mkdir(visRoot)
 
-demoData = '/home/yu/Documents/IncubitChallenge/Demo'
+    for imgName in os.listdir(imgPath):
+        imgNameFull = os.path.join(imgPath, imgName)
+        resNameFull = os.path.join(resPath, imgName[:-4]+'.json')
+        print(imgName)
 
-imgPath = os.path.join(demoData, 'img')
-resPath = os.path.join(demoData, 'res')
-visRoot = os.path.join(demoData, 'vis')
-if not os.path.exists(imgPath):
-    os.mkdir(imgPath)
-if not os.path.exists(resPath):
-    os.mkdir(resPath)
-if not os.path.exists(visRoot):
-    os.mkdir(visRoot)
+        predOneImg(predictor, imgNameFull, resNameFull, visRoot, thing_classes, divNum=2, isVis=isVis)
 
-for imgName in os.listdir(imgPath):
-    imgNameFull = os.path.join(imgPath, imgName)
-    resNameFull = os.path.join(resPath, imgName[:-4]+'.json')
-    print(imgName)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='new')
+    parser.add_argument("--taskName", type=str)
+    parser.add_argument("--dataRoot", type=str)
+    parser.add_argument("--isVis", type=int, default=0)
+    args = parser.parse_args()
 
-    predOneImg(predictor, imgNameFull, resNameFull, visRoot, thing_classes, divNum=2, isVis=1)
+    main(args.dataRoot, args.taskName, args.isVis)
 

@@ -16,6 +16,7 @@ from detectron2.engine import DefaultTrainer, DefaultPredictor
 from detectron2.config import get_cfg
 import matplotlib.pyplot as plt
 from detectron2.utils.visualizer import Visualizer
+import argparse
 
 def segment2bbox(segmentList):
     polygon = np.array(segmentList).reshape(-1, 2)
@@ -220,13 +221,15 @@ def createDirsExp(dataRoot, imgRawRoot, annoRawRoot):
     annoBatch = os.path.join(expRoot, 'annoBatch')
     if not os.path.exists(annoBatch): os.mkdir(annoBatch)
     # copy raw images
-    rawImgList = glob.glob(imgRawRoot + '/*.png')
-    for file in rawImgList:
-        shutil.copy2(file, imgFull)
+    # rawImgList = glob.glob(imgRawRoot + '/*.png')
+    # for file in rawImgList:
+    #     shutil.copy2(file, imgFull)
     # copy raw anno
     rawAnnoList = glob.glob(annoRawRoot + '/*.json')
     for file in rawAnnoList:
         shutil.copy2(file, annoFull)
+        imgName = os.path.join(imgRawRoot, str.split(file[:-15], '/')[-1])
+        shutil.copy2(imgName, imgFull)
     # split image into batches
     for imgName in os.listdir(imgFull):
         annoName = imgName + '-annotated.json'
@@ -252,13 +255,12 @@ def createDirsDemo(dataRoot, imgRawRoot, annoRawRoot):
     annoBatch = os.path.join(demoRoot, 'annoBatch')
     if not os.path.exists(annoBatch): os.mkdir(annoBatch)
     # copy raw images
-    rawImgList = glob.glob(imgRawRoot + '/*.png')
-    for file in rawImgList:
-        shutil.copy2(file, imgFull)
-    # copy raw anno
+
     rawAnnoList = glob.glob(annoRawRoot + '/*.json')
     for file in rawAnnoList:
         shutil.copy2(file, annoFull)
+        imgName = os.path.join(imgRawRoot, str.split(file[:-15], '/')[-1])
+        shutil.copy2(imgName, imgFull)
     # split image into batches
     for imgName in os.listdir(imgFull):
         annoName = imgName + '-annotated.json'
@@ -272,14 +274,16 @@ def createDirsDemo(dataRoot, imgRawRoot, annoRawRoot):
         shutil.copy2(imgName, trainBatch)
     print("Demo root done!")
 
-def main():
-    dataRoot = '/home/yu/Documents/IncubitChallenge/DataRaw'
+def main(dataRoot):
     imgRawRoot = os.path.join(dataRoot, 'raw')
     annoRawRoot = os.path.join(dataRoot, 'annotations')
     createDirsExp(dataRoot, imgRawRoot, annoRawRoot)
     createDirsDemo(dataRoot, imgRawRoot, annoRawRoot)
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='new')
+    parser.add_argument("--dataRoot", type=str)
+    args = parser.parse_args()
+    main(args.dataRoot)
 
 

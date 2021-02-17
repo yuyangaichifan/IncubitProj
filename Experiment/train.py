@@ -1,4 +1,4 @@
-import sys
+
 import os
 import argparse
 from detectron2.data import DatasetCatalog, MetadataCatalog, build_detection_test_loader
@@ -6,18 +6,28 @@ from detectron2.evaluation import  COCOEvaluator, inference_on_dataset
 from detectron2.engine import DefaultTrainer, DefaultPredictor
 from detectron2.config import get_cfg
 from Data.preProcessData import createDataFunc
+import sys
 sys.path.append(".")
+
 def trainModel(trainDir, annoRoot, taskName, testDir=None):
     trainFunc = createDataFunc(trainDir, annoRoot)
     DatasetCatalog.register("TrainSetBatch", trainFunc)
     MetadataCatalog.get('TrainSetBatch').set(thing_classes=['Houses', 'Buildings', 'Sheds/Garages'])
+
+
     cfg = get_cfg()
     cfg.merge_from_file("Cfg/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml")
     cfg.DATASETS.TRAIN = ("TrainSetBatch",)
+    if testDir is not None:
+        testFunc = createDataFunc(testDir, annoRoot)
+        DatasetCatalog.register("TestSetBatch", testFunc)
+        MetadataCatalog.get('TestSetBatch').set(thing_classes=['Houses', 'Buildings', 'Sheds/Garages'])
+        cfg.DATASETS.TEST = ("TestSetBatch",)
+
     cfg.DATALOADER.NUM_WORKERS = 24
     cfg.MODEL.WEIGHTS = "detectron2://COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x/138205316/model_final_a3ec72.pkl"  # 模型微调
     cfg.SOLVER.IMS_PER_BATCH = 6
-    cfg.SOLVER.MAX_ITER = 6000
+    cfg.SOLVER.MAX_ITER = 8000
     cfg.SOLVER.STEPS = [200, ]
     cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 512  # faster, and good enough for this toy dataset
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 3  # 仅有一类(ballon)
@@ -29,12 +39,10 @@ def trainModel(trainDir, annoRoot, taskName, testDir=None):
     if testDir == None:
         return
     else:
-        testFunc = createDataFunc(testDir, annoRoot)
-        DatasetCatalog.register("TestSetBatch", testFunc)
-        MetadataCatalog.get('TestSetBatch').set(thing_classes=['Houses', 'Buildings', 'Sheds/Garages'])
         cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
         cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5  # 测试的阈值
         cfg.DATASETS.TEST = ("TestSetBatch",)
+        cfg.OUTPUT_DIR = './' + taskName + '_output'
         predictor = DefaultPredictor(cfg)
         evaluator = COCOEvaluator("TestSetBatch", output_dir='./output')
         val_loader = build_detection_test_loader(cfg, "TestSetBatch")
