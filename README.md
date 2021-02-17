@@ -53,6 +53,12 @@ In the Exp part, the whole data is splitted into training (80%) and testing (20%
 In the Demo part, we train another model on all available data for you to infer your own data. This model (DemoModel) may have a better performance then the ExpModel.
 
 ## 2. Train a model
+### 2.0 pretrained model
+If you are not interested in training a model, download the "Exp_output/model_final.pth" and "Demo_output/model_final.pth" from the following link and go to step 3.
+
+https://drive.google.com/drive/folders/1Agoz7wD7Xb21x0H4rUO210aSgWvxQGEI?usp=sharing
+
+### 2.1 training
 In order to train a model for both Exp and Demo, please run the following command
 
         python Experiment/train.py --dataRoot DataRoot --taskName TaskName
@@ -60,10 +66,10 @@ In order to train a model for both Exp and Demo, please run the following comman
 where TaskName is either "Exp" or "Demo".
 
 The model will be saved at "ProjRoot/Exp_output" or "ProjRoot/Demo_output"
-### 2.1 performence evaluation
+### 2.2 performence evaluation
 For the Exp part, a performence evaluation is conducted after training, you can find the result in terminal if you train by yourself or find in my slides.
 
-### 2.2 testing set visualization
+### 2.3 testing set visualization
 For the Exp part, I also add a visualization tool. Please run the following command
 
         python Experiment/inferAndVisTest.py  --dataRoot DataRoot --taskName Exp
@@ -77,7 +83,7 @@ In order to infer your own data, you should put your own data in "DataRoot/Demo/
 
 you can find the json results in "DataRoot/Demo/resInfer".
 
-If you further visualize the results, please run
+If you further want to visualize the results, please run
 
         python Demo/demoOnfull.py  --dataRoot DataRoot --taskName Demo --isVis 1
 then, you can find the visualization in "DataRoot/Demo/visInfer".

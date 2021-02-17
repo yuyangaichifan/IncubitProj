@@ -1,4 +1,5 @@
-
+import sys
+sys.path.append(".")
 import os
 import argparse
 from detectron2.data import DatasetCatalog, MetadataCatalog, build_detection_test_loader
@@ -6,8 +7,7 @@ from detectron2.evaluation import  COCOEvaluator, inference_on_dataset
 from detectron2.engine import DefaultTrainer, DefaultPredictor
 from detectron2.config import get_cfg
 from Data.preProcessData import createDataFunc
-import sys
-sys.path.append(".")
+
 
 def trainModel(trainDir, annoRoot, taskName, testDir=None):
     trainFunc = createDataFunc(trainDir, annoRoot)
