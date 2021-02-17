@@ -31,7 +31,7 @@ Denote the root of the data as DataRoot, it should contains the following conten
     
 Then you should run the following lines to prepare the data
 
-      python data/preProcessData.py --dataRoot DataRoot
+      python Data/preProcessData.py --dataRoot DataRoot
 
 The DataRoot will be updated as:  
 
