@@ -50,16 +50,16 @@ The DataRoot will be updated as:
         - ...
     
 In the Exp part, the whole data is splitted into training (80%) and testing (20%) sets, a model (ExpModel) is trained on training set and tested on testing set.  
-In the Demo part, we train another model on all available data for you to infer your own data. This model (DemoModel) may have a better performance then the ExpModel.
+In the Demo part, we train another model (DemoModel) on all available data. DemoModel is for you to infer your own data which may have a better performance then the ExpModel.
 
 ## 2. Train a model
 ### 2.0 pretrained model
-If you are not interested in training a model, download the "Exp_output/model_final.pth" and "Demo_output/model_final.pth" from the following link and go to step 3.
+If you are not interested in training a model, download the "Exp_output/model_final.pth" and "Demo_output/model_final.pth" from the link below and put them in "ProjRoot/Exp_output/model_final.pth" and "ProjRoot/Demo_output/model_final.pth" , then go to step 3.
 
 https://drive.google.com/drive/folders/1Agoz7wD7Xb21x0H4rUO210aSgWvxQGEI?usp=sharing
 
 ### 2.1 training
-In order to train a model for both Exp and Demo, please run the following command
+In order to train ExpModel and DemoModel, please run the following command
 
         python Experiment/train.py --dataRoot DataRoot --taskName TaskName
 
